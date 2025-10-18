@@ -35,5 +35,28 @@ public class GuestService {
         return guests.save(g);
     }
 
+    public Guest createFromDto(String name, String email, Long roomId) {
+        Guest g = new Guest();
+        g.setName(name);
+        g.setEmail(email);
+        if (roomId != null) {
+            Room r = rooms.findById(roomId).orElseThrow();
+            g.setRoom(r);
+        }
+        return guests.save(g);
+    }
+
+    public Guest updateFromDto(Long id, String name, String email, Long roomId) {
+        Guest g = get(id);
+        g.setName(name);
+        g.setEmail(email);
+        if (roomId != null) {
+            Room r = rooms.findById(roomId).orElseThrow();
+            g.setRoom(r);
+        }
+        return guests.save(g);
+    }
+
+
     public List<Guest> byRoom(Long roomId) { return guests.findByRoom_Id(roomId); }
 }
