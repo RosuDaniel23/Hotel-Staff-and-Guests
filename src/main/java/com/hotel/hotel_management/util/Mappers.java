@@ -11,6 +11,7 @@ public class Mappers {
         out.setNumber(r.getNumber());
         out.setType(r.getType());
         out.setPrice(r.getPrice());
+        out.setStatus(r.getStatus());
         return out;
     }
 

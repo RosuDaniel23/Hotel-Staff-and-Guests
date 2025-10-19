@@ -12,6 +12,7 @@ public class RoomDtos {
         private String type;
         @NotNull @Positive
         private BigDecimal price;
+        private String status = "AVAILABLE"; // Default to AVAILABLE
 
         public String getNumber() { return number; }
         public void setNumber(String number) { this.number = number; }
@@ -19,6 +20,8 @@ public class RoomDtos {
         public void setType(String type) { this.type = type; }
         public BigDecimal getPrice() { return price; }
         public void setPrice(BigDecimal price) { this.price = price; }
+        public String getStatus() { return status; }
+        public void setStatus(String status) { this.status = status; }
     }
 
     public static class Update {
@@ -28,6 +31,7 @@ public class RoomDtos {
         private String type;
         @NotNull @Positive
         private BigDecimal price;
+        private String status;
 
         public String getNumber() { return number; }
         public void setNumber(String number) { this.number = number; }
@@ -35,6 +39,8 @@ public class RoomDtos {
         public void setType(String type) { this.type = type; }
         public BigDecimal getPrice() { return price; }
         public void setPrice(BigDecimal price) { this.price = price; }
+        public String getStatus() { return status; }
+        public void setStatus(String status) { this.status = status; }
     }
 
     public static class Response {
@@ -42,6 +48,7 @@ public class RoomDtos {
         private String number;
         private String type;
         private BigDecimal price;
+        private String status;
 
         public Long getId() { return id; }
         public void setId(Long id) { this.id = id; }
@@ -51,5 +58,7 @@ public class RoomDtos {
         public void setType(String type) { this.type = type; }
         public BigDecimal getPrice() { return price; }
         public void setPrice(BigDecimal price) { this.price = price; }
+        public String getStatus() { return status; }
+        public void setStatus(String status) { this.status = status; }
     }
 }

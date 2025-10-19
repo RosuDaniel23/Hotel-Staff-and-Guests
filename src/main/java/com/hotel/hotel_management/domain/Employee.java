@@ -24,10 +24,10 @@ public class Employee {
     public String getName() { return name; }
     public String getRole() { return role; }
     public String getEmail() { return email; }
-
     // setters
     public void setId(Long id) { this.id = id; }
     public void setName(String name) { this.name = name; }
     public void setRole(String role) { this.role = role; }
     public void setEmail(String email) { this.email = email; }
+
 }

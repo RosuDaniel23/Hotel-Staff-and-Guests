@@ -21,6 +21,7 @@ public class RoomController {
         r.setNumber(in.getNumber());
         r.setType(in.getType());
         r.setPrice(in.getPrice());
+        r.setStatus(in.getStatus() != null ? in.getStatus() : "AVAILABLE");
         return Mappers.toResponse(service.create(r));
     }
 
@@ -47,11 +48,19 @@ public class RoomController {
         r.setNumber(in.getNumber());
         r.setType(in.getType());
         r.setPrice(in.getPrice());
+        r.setStatus(in.getStatus() != null ? in.getStatus() : "AVAILABLE");
         return Mappers.toResponse(service.update(id, r));
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id){ service.delete(id); }
+
+    @PatchMapping("/{id}/status")
+    public RoomDtos.Response updateStatus(@PathVariable Long id, @RequestParam String status) {
+        Room room = service.get(id);
+        room.setStatus(status);
+        return Mappers.toResponse(service.update(id, room));
+    }
 
     private Sort.Order[] parseSort(String[] sort) {
         // ex: ["price,desc","number,asc"]

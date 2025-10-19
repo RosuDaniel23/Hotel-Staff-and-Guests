@@ -26,11 +26,31 @@ public class GuestService {
         g.setEmail(in.getEmail());
         return guests.save(g);
     }
-    public void delete(Long id) { guests.deleteById(id); }
+    public void delete(Long id) { 
+        Guest g = get(id);
+        // If guest had a room, set it back to AVAILABLE
+        if (g.getRoom() != null) {
+            Room room = g.getRoom();
+            room.setStatus("AVAILABLE");
+            rooms.save(room);
+        }
+        guests.deleteById(id); 
+    }
 
     public Guest assignToRoom(Long guestId, Long roomId) {
         Guest g = get(guestId);
+        
+        // If guest had a previous room, set it back to AVAILABLE
+        if (g.getRoom() != null) {
+            Room oldRoom = g.getRoom();
+            oldRoom.setStatus("AVAILABLE");
+            rooms.save(oldRoom);
+        }
+        
+        // Assign new room and set it to BOOKED
         Room r = rooms.findById(roomId).orElseThrow();
+        r.setStatus("BOOKED");
+        rooms.save(r);
         g.setRoom(r);
         return guests.save(g);
     }
@@ -41,6 +61,8 @@ public class GuestService {
         g.setEmail(email);
         if (roomId != null) {
             Room r = rooms.findById(roomId).orElseThrow();
+            r.setStatus("BOOKED");
+            rooms.save(r);
             g.setRoom(r);
         }
         return guests.save(g);
@@ -48,12 +70,27 @@ public class GuestService {
 
     public Guest updateFromDto(Long id, String name, String email, Long roomId) {
         Guest g = get(id);
+        
+        // If room is being changed
+        if (g.getRoom() != null && (roomId == null || !g.getRoom().getId().equals(roomId))) {
+            // Set old room to AVAILABLE
+            Room oldRoom = g.getRoom();
+            oldRoom.setStatus("AVAILABLE");
+            rooms.save(oldRoom);
+        }
+        
         g.setName(name);
         g.setEmail(email);
+        
         if (roomId != null) {
             Room r = rooms.findById(roomId).orElseThrow();
+            r.setStatus("BOOKED");
+            rooms.save(r);
             g.setRoom(r);
+        } else {
+            g.setRoom(null);
         }
+        
         return guests.save(g);
     }
 

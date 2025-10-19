@@ -19,13 +19,26 @@ public class Room {
     @Column(nullable=false, precision = 10, scale = 2)
     private BigDecimal price;
 
+    @Column(nullable=true)
+    private String status = "AVAILABLE"; // AVAILABLE, BOOKED, MAINTENANCE
+
     public Room() {}
+    
+    @PostLoad
+    private void ensureStatus() {
+        if (this.status == null) {
+            this.status = "AVAILABLE";
+        }
+    }
+    
     public Long getId() { return id; }
     public String getNumber() { return number; }
     public String getType() { return type; }
     public BigDecimal getPrice() { return price; }
+    public String getStatus() { return status != null ? status : "AVAILABLE"; }
     public void setId(Long id) { this.id = id; }
     public void setNumber(String number) { this.number = number; }
     public void setType(String type) { this.type = type; }
     public void setPrice(BigDecimal price) { this.price = price; }
+    public void setStatus(String status) { this.status = status; }
 }
