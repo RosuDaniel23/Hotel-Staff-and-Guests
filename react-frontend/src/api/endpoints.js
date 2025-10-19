@@ -1,0 +1,41 @@
+import http from './http';
+
+// Room endpoints
+export const roomApi = {
+    getAll: () => http.get('/rooms'),
+    getById: (id) => http.get(`/rooms/${id}`),
+    create: (room) => http.post('/rooms', room),
+    update: (id, room) => http.put(`/rooms/${id}`, room),
+    delete: (id) => http.delete(`/rooms/${id}`),
+    updateStatus: (id, status) => http.patch(`/rooms/${id}/status?status=${status}`)
+};
+
+// Employee endpoints
+export const employeeApi = {
+    getAll: () => http.get('/employees'),
+    getById: (id) => http.get(`/employees/${id}`),
+    create: (employee) => http.post('/employees', {
+        name: employee.name,
+        email: employee.email,
+        role: employee.role
+    }),
+    update: (id, employee) => http.put(`/employees/${id}`, {
+        name: employee.name,
+        email: employee.email,
+        role: employee.role
+    }),
+    delete: (id) => http.delete(`/employees/${id}`),
+    getAnalytics: () => http.get('/employees/analytics/by-role')
+};
+
+// Guest endpoints
+export const guestApi = {
+    getAll: () => http.get('/guests'),
+    getById: (id) => http.get(`/guests/${id}`),
+    create: (guest) => http.post('/guests', guest),
+    update: (id, guest) => http.put(`/guests/${id}`, guest),
+    delete: (id) => http.delete(`/guests/${id}`),
+    assignRoom: (guestId, roomId) => http.put(`/guests/${guestId}/assign/${roomId}`),
+    getByRoom: (roomId) => http.get(`/guests/by-room/${roomId}`),
+    getAnalytics: () => http.get('/guests/analytics/by-room-type')
+};
