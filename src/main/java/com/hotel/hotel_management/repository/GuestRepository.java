@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface GuestRepository extends JpaRepository<Guest, Long> {
     interface TypeCount { String getType(); long getCnt(); }
@@ -17,4 +18,6 @@ public interface GuestRepository extends JpaRepository<Guest, Long> {
     List<TypeCount> countGuestsPerRoomType();
 
     List<Guest> findByRoom_Id(Long roomId);
+
+    Optional<Guest> findByEmail(String email);
 }

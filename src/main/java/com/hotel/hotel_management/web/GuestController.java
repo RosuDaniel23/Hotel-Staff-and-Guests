@@ -51,8 +51,17 @@ public class GuestController {
         return service.byRoom(roomId).stream().map(Mappers::toResponse).toList();
     }
 
-    @GetMapping("/analytics/by-room-type")
-    public List<GuestRepository.TypeCount> guestsPerRoomType() {
-        return repo.countGuestsPerRoomType();
+    @GetMapping("/analytics")
+    public List<GuestAnalytics> getAnalytics() {
+        return repo.findAll().stream()
+            .collect(java.util.stream.Collectors.groupingBy(
+                guest -> guest.getRoom() != null ? guest.getRoom().getType() : "No Room",
+                java.util.stream.Collectors.counting()
+            ))
+            .entrySet().stream()
+            .map(entry -> new GuestAnalytics(entry.getKey(), entry.getValue()))
+            .toList();
     }
+
+    public record GuestAnalytics(String type, Long cnt) {}
 }

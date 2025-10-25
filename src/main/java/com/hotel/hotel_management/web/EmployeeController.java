@@ -50,6 +50,17 @@ public class EmployeeController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id){ service.delete(id); }
 
-    @GetMapping("/analytics/by-role")
-    public List<EmployeeRepository.RoleCount> countByRole() { return repo.countByRole(); }
+    @GetMapping("/analytics")
+    public List<EmployeeAnalytics> getAnalytics() {
+        return repo.findAll().stream()
+            .collect(java.util.stream.Collectors.groupingBy(
+                Employee::getRole,
+                java.util.stream.Collectors.counting()
+            ))
+            .entrySet().stream()
+            .map(entry -> new EmployeeAnalytics(entry.getKey(), entry.getValue()))
+            .toList();
+    }
+
+    public record EmployeeAnalytics(String role, Long cnt) {}
 }
