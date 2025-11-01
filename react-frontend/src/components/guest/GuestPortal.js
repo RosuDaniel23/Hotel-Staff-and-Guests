@@ -1,29 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
+import { guestPortalApi } from '../../api/endpoints';
 
 const GuestPortal = () => {
   const { user } = useAuth();
   const [roomInfo, setRoomInfo] = useState(null);
   const [availableUpgrades, setAvailableUpgrades] = useState([]);
   const [upgradeRequests, setUpgradeRequests] = useState([]);
+  const [serviceRequests, setServiceRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [serviceNote, setServiceNote] = useState('');
+  const [serviceSubmitting, setServiceSubmitting] = useState(false);
 
   useEffect(() => {
     fetchGuestData();
     fetchUpgradeRequests();
+    fetchServiceRequests();
   }, [user]);
 
   const fetchGuestData = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/guest-portal/${user.id}/room`);
+      const response = await guestPortalApi.getGuestRoom(user.id);
       setRoomInfo(response.data);
-
       if (response.data.room) {
-        const upgradesResponse = await axios.get(
-          `http://localhost:8080/api/guest-portal/available-upgrades?guestId=${user.id}`
-        );
+        const upgradesResponse = await guestPortalApi.getAvailableUpgrades(user.id);
         setAvailableUpgrades(upgradesResponse.data);
       }
     } catch (error) {
@@ -35,27 +36,44 @@ const GuestPortal = () => {
 
   const fetchUpgradeRequests = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/guest-portal/${user.id}/upgrade-requests`
-      );
+      const response = await guestPortalApi.getUpgradeRequests(user.id);
       setUpgradeRequests(response.data);
     } catch (error) {
       console.error('Error fetching upgrade requests:', error);
     }
   };
 
+  const fetchServiceRequests = async () => {
+    try {
+      const response = await guestPortalApi.listServiceRequests(user.id);
+      setServiceRequests(response.data);
+    } catch (error) {
+      console.error('Error fetching service requests:', error);
+    }
+  };
+
   const handleUpgradeRequest = async (roomId) => {
     try {
-      await axios.post('http://localhost:8080/api/guest-portal/upgrade-request', {
-        guestId: user.id,
-        requestedRoomId: roomId
-      });
-
+      await guestPortalApi.requestUpgrade(user.id, roomId);
       alert('Upgrade request submitted successfully!');
       setShowUpgradeModal(false);
       fetchUpgradeRequests();
     } catch (error) {
       alert('Error submitting upgrade request: ' + (error.response?.data?.message || error.message));
+    }
+  };
+
+  const submitServiceRequest = async (type) => {
+    if (serviceSubmitting) return;
+    setServiceSubmitting(true);
+    try {
+      await guestPortalApi.createServiceRequest(user.id, { type, note: serviceNote });
+      setServiceNote('');
+      await fetchServiceRequests();
+    } catch (error) {
+      alert('Error submitting service request: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setServiceSubmitting(false);
     }
   };
 
@@ -77,10 +95,9 @@ const GuestPortal = () => {
           <p className="text-gray-600">{roomInfo?.guest?.email}</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Room</h2>
-
             {roomInfo?.room ? (
               <div className="space-y-4">
                 <div className="bg-indigo-50 rounded-lg p-4">
@@ -89,7 +106,6 @@ const GuestPortal = () => {
                   </div>
                   <div className="text-lg text-gray-700">{roomInfo.room.type}</div>
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div className="text-sm text-gray-600">Price per Night</div>
@@ -108,7 +124,6 @@ const GuestPortal = () => {
                     </div>
                   </div>
                 </div>
-
                 <button
                   onClick={() => setShowUpgradeModal(true)}
                   className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 transition"
@@ -125,39 +140,59 @@ const GuestPortal = () => {
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Upgrade Requests</h2>
-
-            {upgradeRequests.length > 0 ? (
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {upgradeRequests.map((request) => (
-                  <div key={request.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="text-sm font-medium text-gray-900">
-                        Room {request.currentRoom.number} → Room {request.requestedRoom.number}
-                      </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Guest Services</h2>
+            <div className="space-y-3">
+              <textarea
+                value={serviceNote}
+                onChange={(e) => setServiceNote(e.target.value)}
+                placeholder="Add an optional note"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button
+                  onClick={() => submitServiceRequest('HOUSEKEEPING')}
+                  disabled={serviceSubmitting}
+                  className="bg-indigo-600 text-white py-2 px-3 rounded-lg font-medium hover:bg-indigo-700 transition disabled:opacity-50"
+                >
+                  Housekeeping
+                </button>
+                <button
+                  onClick={() => submitServiceRequest('TOWELS')}
+                  disabled={serviceSubmitting}
+                  className="bg-indigo-600 text-white py-2 px-3 rounded-lg font-medium hover:bg-indigo-700 transition disabled:opacity-50"
+                >
+                  Extra Towels
+                </button>
+                <button
+                  onClick={() => submitServiceRequest('LATE_CHECKOUT')}
+                  disabled={serviceSubmitting}
+                  className="bg-indigo-600 text-white py-2 px-3 rounded-lg font-medium hover:bg-indigo-700 transition disabled:opacity-50"
+                >
+                  Late Checkout
+                </button>
+              </div>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mt-6 mb-2">Your Requests</h3>
+            {serviceRequests.length > 0 ? (
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {serviceRequests.map((r) => (
+                  <div key={r.id} className="border border-gray-200 rounded-lg p-3">
+                    <div className="flex justify-between items-center">
+                      <div className="text-sm font-medium text-gray-900">{r.type.replace(/_/g,' ')}</div>
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        request.status === 'PENDING' 
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : request.status === 'APPROVED'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
+                        r.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                        r.status === 'COMPLETED' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                       }`}>
-                        {request.status}
+                        {r.status}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-600">
-                      {request.currentRoom.type} (${request.currentRoom.price}) → {request.requestedRoom.type} (${request.requestedRoom.price})
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      Requested: {new Date(request.requestedAt).toLocaleString()}
-                    </div>
+                    {r.note && <div className="text-xs text-gray-600 mt-1">{r.note}</div>}
+                    <div className="text-xs text-gray-500 mt-1">Requested: {new Date(r.requestedAt).toLocaleString()}</div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-600">
-                No upgrade requests yet.
-              </div>
+              <div className="text-sm text-gray-600">No service requests yet.</div>
             )}
           </div>
         </div>
@@ -177,7 +212,6 @@ const GuestPortal = () => {
                 </svg>
               </button>
             </div>
-
             {availableUpgrades.length > 0 ? (
               <div className="grid md:grid-cols-2 gap-4">
                 {availableUpgrades.map((room) => (

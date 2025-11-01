@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
+import { authApi } from '../../api/endpoints';
 
 const Login = () => {
   const [loginType, setLoginType] = useState('employee');
@@ -18,17 +18,11 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const endpoint = loginType === 'employee'
-        ? '/api/auth/employee/login'
-        : '/api/auth/guest/login';
-
-      const response = await axios.post(`http://localhost:8080${endpoint}`, {
-        email,
-        password
-      });
+      const response = loginType === 'employee'
+        ? await authApi.employeeLogin({ email, password })
+        : await authApi.guestLogin({ email, password });
 
       login(response.data, loginType);
-
       if (loginType === 'employee') {
         navigate('/dashboard');
       } else {
@@ -87,7 +81,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-                placeholder={loginType === 'employee' ? 'staff@hotel.com' : 'guest@email.com'}
+                placeholder={loginType === 'employee' ? 'admin@hotel.com' : 'guest@hotel.com'}
               />
             </div>
 

@@ -9,7 +9,9 @@ export const guestPortalApi = {
     getGuestRoom: (guestId) => http.get(`guest-portal/${guestId}/room`),
     getAvailableUpgrades: (guestId) => http.get(`guest-portal/available-upgrades?guestId=${guestId}`),
     requestUpgrade: (guestId, requestedRoomId) => http.post('guest-portal/upgrade-request', { guestId, requestedRoomId }),
-    getUpgradeRequests: (guestId) => http.get(`guest-portal/${guestId}/upgrade-requests`)
+    getUpgradeRequests: (guestId) => http.get(`guest-portal/${guestId}/upgrade-requests`),
+    createServiceRequest: (guestId, body) => http.post(`guest-portal/${guestId}/service-requests`, body),
+    listServiceRequests: (guestId) => http.get(`guest-portal/${guestId}/service-requests`)
 };
 
 export const roomApi = {

@@ -11,7 +11,7 @@ if [ ! -f "pom.xml" ]; then
 fi
 
 echo "📦 Step 1: Building backend..."
-./mvnw clean install -DskipTests
+./mvnw -q clean install -DskipTests
 if [ $? -ne 0 ]; then
     echo "❌ Backend build failed"
     exit 1
@@ -21,7 +21,7 @@ echo ""
 
 echo "📦 Step 2: Installing frontend dependencies..."
 cd react-frontend
-npm install
+npm install --silent
 if [ $? -ne 0 ]; then
     echo "❌ Frontend installation failed"
     exit 1
@@ -33,11 +33,11 @@ echo ""
 echo "🚀 Step 3: Starting services..."
 echo ""
 echo "Starting backend on http://localhost:8080..."
-./mvnw spring-boot:run &
+./mvnw -q spring-boot:run -Dspring-boot.run.profiles=dev &
 BACKEND_PID=$!
 
 echo "Waiting for backend to start..."
-sleep 10
+sleep 5
 
 echo "Starting frontend on http://localhost:3000..."
 cd react-frontend
@@ -56,14 +56,13 @@ echo "🔧 Backend:  http://localhost:8080"
 echo ""
 echo "📝 Test Credentials:"
 echo "   Staff Login:"
-echo "   - Email: Any employee email in your database"
-echo "   - Password: password123"
+echo "   - Email: admin@hotel.com"
+echo "   - Password: password"
 echo ""
 echo "   Guest Login:"
-echo "   - Email: Any guest email in your database"
-echo "   - Password: password123"
+echo "   - Email: guest@hotel.com"
+echo "   - Password: password"
 echo ""
 echo "To stop the services:"
 echo "   kill $BACKEND_PID $FRONTEND_PID"
 echo ""
-
