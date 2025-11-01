@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { guestPortalApi } from '../../api/endpoints';
+import GuestChatbot from './GuestChatbot';
 
 const GuestPortal = () => {
   const { user } = useAuth();
@@ -245,6 +246,8 @@ const GuestPortal = () => {
           </div>
         </div>
       )}
+
+      <GuestChatbot />
     </div>
   );
 };

@@ -66,6 +66,13 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!-- === JSON Processing === -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.10.1</version>
+		</dependency>
+
 		<!-- === Mail Support (pentru trimiterea de e-mailuri în desktop client) === -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

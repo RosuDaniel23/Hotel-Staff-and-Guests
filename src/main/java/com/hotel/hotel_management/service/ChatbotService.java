@@ -1,0 +1,254 @@
+package com.hotel.hotel_management.service;
+
+import org.springframework.stereotype.Service;
+import java.util.*;
+import java.util.regex.Pattern;
+
+@Service
+public class ChatbotService {
+
+    private final OpenAIService openAIService;
+    private final Map<Pattern, String> responses = new LinkedHashMap<>();
+
+    public ChatbotService(OpenAIService openAIService) {
+        this.openAIService = openAIService;
+        initializeResponses();
+    }
+
+    private void initializeResponses() {
+        responses.put(
+            Pattern.compile(".*\\b(suite|luxury|premium)\\b.*", Pattern.CASE_INSENSITIVE),
+            "🏨 Our Suite rooms are our premium offering! Advantages include:\n" +
+            "• Spacious living area (45m²)\n" +
+            "• King-size bed with premium bedding\n" +
+            "• Separate living room and bedroom\n" +
+            "• Mini bar and coffee machine\n" +
+            "• Luxury bathroom with jacuzzi\n" +
+            "• Panoramic city view\n" +
+            "• 24/7 room service\n" +
+            "• Price: $250 per night\n\n" +
+            "Perfect for special occasions or extended stays!"
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(double|double room)\\b.*", Pattern.CASE_INSENSITIVE),
+            "🛏️ Our Double rooms offer great comfort:\n" +
+            "• 30m² comfortable space\n" +
+            "• Queen-size bed\n" +
+            "• Work desk and seating area\n" +
+            "• Private bathroom with shower\n" +
+            "• Free Wi-Fi and TV\n" +
+            "• Climate control\n" +
+            "• Price: $120 per night\n\n" +
+            "Ideal for couples or business travelers!"
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(single|single room)\\b.*", Pattern.CASE_INSENSITIVE),
+            "🛏️ Our Single rooms are perfect for solo travelers:\n" +
+            "• 20m² cozy space\n" +
+            "• Comfortable single bed\n" +
+            "• Work desk\n" +
+            "• Private bathroom\n" +
+            "• Free Wi-Fi and TV\n" +
+            "• Climate control\n" +
+            "• Price: $75 per night\n\n" +
+            "Great value for budget-conscious guests!"
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(upgrade|room upgrade)\\b.*", Pattern.CASE_INSENSITIVE),
+            "⬆️ Room Upgrades:\n\n" +
+            "You can upgrade your room through our Guest Portal!\n" +
+            "Simply go to 'Available Upgrades' and select a better room.\n\n" +
+            "Upgrades are subject to availability. We'll notify you once approved.\n" +
+            "Price difference will be calculated for your remaining stay."
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(amenities|facilities|services)\\b.*", Pattern.CASE_INSENSITIVE),
+            "🎯 Hotel Amenities & Services:\n\n" +
+            "• 24/7 Front Desk\n" +
+            "• Free Wi-Fi throughout the hotel\n" +
+            "• Fitness Center\n" +
+            "• Restaurant & Bar\n" +
+            "• Room Service\n" +
+            "• Laundry Service\n" +
+            "• Business Center\n" +
+            "• Free Parking\n" +
+            "• Concierge Service\n\n" +
+            "Need something specific? Just ask!"
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(check-?in|check in|arrival)\\b.*", Pattern.CASE_INSENSITIVE),
+            "🕐 Check-in Information:\n\n" +
+            "• Check-in time: 3:00 PM\n" +
+            "• Early check-in: Available upon request (subject to availability)\n" +
+            "• Required: Valid ID and booking confirmation\n" +
+            "• Payment: Cash or credit card accepted\n\n" +
+            "Please visit the front desk upon arrival!"
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(check-?out|checkout|departure)\\b.*", Pattern.CASE_INSENSITIVE),
+            "🕐 Check-out Information:\n\n" +
+            "• Check-out time: 11:00 AM\n" +
+            "• Late check-out: Available upon request (additional charges may apply)\n" +
+            "• Express check-out: Available at front desk\n\n" +
+            "Please return your room key before leaving!"
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(breakfast|meal|restaurant|food|dining)\\b.*", Pattern.CASE_INSENSITIVE),
+            "🍳 Dining Options:\n\n" +
+            "• Breakfast Buffet: 7:00 AM - 10:00 AM ($15 per person)\n" +
+            "• Restaurant: 12:00 PM - 10:00 PM (lunch & dinner)\n" +
+            "• Room Service: 24/7 available\n" +
+            "• Bar: 5:00 PM - 12:00 AM\n\n" +
+            "Breakfast can be added to your reservation!"
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(wifi|internet|password)\\b.*", Pattern.CASE_INSENSITIVE),
+            "📶 Wi-Fi Information:\n\n" +
+            "• Network: Hotel-Guest-WiFi\n" +
+            "• Free high-speed internet in all rooms\n" +
+            "• Password: Available at check-in or on your room card\n" +
+            "• Technical support: Call extension 0 for assistance"
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(parking|car|vehicle)\\b.*", Pattern.CASE_INSENSITIVE),
+            "🚗 Parking Information:\n\n" +
+            "• Free parking available for all guests\n" +
+            "• Located behind the main building\n" +
+            "• Security cameras 24/7\n" +
+            "• Covered parking spots available\n" +
+            "• Valet service: Available upon request"
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(gym|fitness|exercise|workout)\\b.*", Pattern.CASE_INSENSITIVE),
+            "💪 Fitness Center:\n\n" +
+            "• Open 24/7 for hotel guests\n" +
+            "• Modern equipment: treadmills, weights, bikes\n" +
+            "• Towels and water provided\n" +
+            "• Located on ground floor\n" +
+            "• Personal trainer: Available by appointment"
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(cancel|cancellation|refund)\\b.*", Pattern.CASE_INSENSITIVE),
+            "❌ Cancellation Policy:\n\n" +
+            "• Free cancellation up to 48 hours before check-in\n" +
+            "• Late cancellation: 50% charge\n" +
+            "• No-show: Full charge\n\n" +
+            "For cancellations, please contact our front desk or email reservations@hotel.com"
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(price|cost|rate|expensive|cheap)\\b.*", Pattern.CASE_INSENSITIVE),
+            "💰 Room Rates:\n\n" +
+            "• Single Room: $75/night\n" +
+            "• Double Room: $120/night\n" +
+            "• Suite: $250/night\n\n" +
+            "Rates include:\n" +
+            "✓ Free Wi-Fi\n" +
+            "✓ Free Parking\n" +
+            "✓ Access to all facilities\n\n" +
+            "Special rates available for extended stays!"
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(pet|dog|cat|animal)\\b.*", Pattern.CASE_INSENSITIVE),
+            "🐾 Pet Policy:\n\n" +
+            "Unfortunately, we currently do not allow pets, except for certified service animals.\n" +
+            "Service animals are always welcome with proper documentation.\n\n" +
+            "For assistance, please contact our front desk."
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(contact|phone|email|call)\\b.*", Pattern.CASE_INSENSITIVE),
+            "📞 Contact Information:\n\n" +
+            "• Front Desk: Extension 0 (from room)\n" +
+            "• Phone: +1 (555) 123-4567\n" +
+            "• Email: info@hotel.com\n" +
+            "• Reservations: reservations@hotel.com\n" +
+            "• Emergency: Dial 911\n\n" +
+            "We're here to help 24/7!"
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(help|assist|support|question)\\b.*", Pattern.CASE_INSENSITIVE),
+            "🤝 I'm here to help! You can ask me about:\n\n" +
+            "• Room types and features\n" +
+            "• Hotel amenities and services\n" +
+            "• Check-in/out procedures\n" +
+            "• Dining options\n" +
+            "• Room upgrades\n" +
+            "• Policies and procedures\n" +
+            "• Contact information\n\n" +
+            "Just type your question!"
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(hello|hi|hey|greetings)\\b.*", Pattern.CASE_INSENSITIVE),
+            "👋 Hello! Welcome to our hotel!\n\n" +
+            "I'm your virtual concierge. I can help you with:\n" +
+            "• Room information and upgrades\n" +
+            "• Hotel services and amenities\n" +
+            "• Check-in/out information\n" +
+            "• And much more!\n\n" +
+            "How can I assist you today?"
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(thank|thanks|appreciate)\\b.*", Pattern.CASE_INSENSITIVE),
+            "😊 You're welcome! If you have any other questions, feel free to ask!\n\n" +
+            "Enjoy your stay! 🏨"
+        );
+
+        responses.put(
+            Pattern.compile(".*\\b(bye|goodbye|see you)\\b.*", Pattern.CASE_INSENSITIVE),
+            "👋 Goodbye! Have a wonderful day!\n\n" +
+            "If you need assistance later, I'll be here! 😊"
+        );
+    }
+
+    public String processMessage(String message) {
+        if (message == null || message.trim().isEmpty()) {
+            return "Please type a message so I can assist you! 😊";
+        }
+
+        // Try OpenAI first
+        try {
+            String aiResponse = openAIService.getChatResponse(message);
+            if (aiResponse != null && !aiResponse.trim().isEmpty()) {
+                System.out.println("✅ Using OpenAI GPT-3.5-turbo response");
+                return aiResponse;
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ OpenAI failed, falling back to rule-based: " + e.getMessage());
+        }
+
+        // Fallback to rule-based responses
+        System.out.println("📋 Using rule-based fallback response");
+        String normalizedMessage = message.trim();
+
+        for (Map.Entry<Pattern, String> entry : responses.entrySet()) {
+            if (entry.getKey().matcher(normalizedMessage).matches()) {
+                return entry.getValue();
+            }
+        }
+
+        return "🤔 I'm not sure I understand. Here are some things you can ask me:\n\n" +
+               "• \"What are the advantages of the suite room?\"\n" +
+               "• \"Tell me about room upgrades\"\n" +
+               "• \"What amenities do you offer?\"\n" +
+               "• \"What time is check-in?\"\n" +
+               "• \"How much does a double room cost?\"\n\n" +
+               "Or simply type 'help' to see all available topics!";
+    }
+}
+

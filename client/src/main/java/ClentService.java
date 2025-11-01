@@ -94,4 +94,19 @@ public class ClentService {
         }
         return null;
     }
+
+    public JsonObject sendChatMessage(String message) throws Exception {
+        JsonObject body = new JsonObject();
+        body.addProperty("message", message);
+        HttpRequest req = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/chatbot/message"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(body)))
+                .build();
+        HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+        if (resp.statusCode() == 200) {
+            return JsonParser.parseString(resp.body()).getAsJsonObject();
+        }
+        throw new Exception("Failed to get chatbot response");
+    }
 }
